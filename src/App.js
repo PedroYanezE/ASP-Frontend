@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import {
+    BrowserRouter,
+    Routes,
+    Route
+} from 'react-router-dom'
+
+import TeacherFrame from './components/teacher/TeacherFrame';
+import AssistantFrame from './components/assistant/AssistantFrame';
+
+import ClassroomSelector from './components/teacher/ClassroomSelector';
+import WaitingRoom from './components/teacher/WaitingRoom';
+
+import Dashboard from './components/assistant/Dashboard'
+
+const App = () => {
+    return (
+        <BrowserRouter> 
+            <Routes>
+                <Route path = "/asistente" element = { <AssistantFrame /> }>
+                    <Route index element = { <Dashboard /> } />
+                </Route>
+                <Route path = "/" element = { <TeacherFrame /> }>
+                    <Route index element = { <ClassroomSelector /> } />
+                    <Route path = ":classroomName" element = { <WaitingRoom /> } />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
