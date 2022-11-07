@@ -40,7 +40,7 @@ const FormButton = styled.button`
     width: fit-content;
     height: 1.75rem;
     cursor: ${props => props.helping === 'ok' ? 'pointer' : 'default'};
-    
+
     border: ${props => props.helping === 'ok' ? '1px solid black' : 0};
     background-color: ${props => props.helping === 'ok' ? 'transparent' : 'rgb(153, 153, 153)'};
     color: ${props => props.helping === 'ok' ? 'black' : 'white'};
@@ -55,7 +55,7 @@ const Error = styled.p`
 `;
 
 const WaitingRoom = () => {
-    const [activeClassroom, setActiveClassroom] = useOutletContext()
+    const [activeClassroom, setActiveClassroom, socket] = useOutletContext()
 
     const [help, setHelp] = useState('ok');
     const [helpMessage, setHelpMessage] = useState('');
@@ -77,6 +77,20 @@ const WaitingRoom = () => {
         }
     }, [activeClassroom, setActiveClassroom, loc])
 
+    useEffect(() => {
+        socket.emit('join', loc.pathname.slice(1));
+    }, [])
+
+    useEffect(() => {    
+        socket.on('helping', () => {
+            setHelp('helping');
+        });
+
+        socket.on('helped', () => {
+            setHelp('ok');
+        });
+    }, [socket])
+
     const handleCallForHelp = (event) => {
         event.preventDefault();
 
@@ -86,13 +100,18 @@ const WaitingRoom = () => {
             case 'ok':
                 setHelp('help');
 
-                const newClassroom = activeClassroom
-                newClassroom.status = 'help'
+                const newClassroom = activeClassroom;
+                newClassroom.status = 'help';
+                newClassroom.helpMessage = helpMessage;
+                newClassroom.updateTime = new Date();
+
+                socket.emit('help', newClassroom);
 
                 classroomService
                     .updateOne(newClassroom.id, newClassroom)
                     .then(() => setActiveClassroom(newClassroom))
-                    .catch(error => setError('Tenemos comunicándonos con los asistentes, intente más tarde'))
+                    .catch(() => setError('Tenemos problemas comunicándonos con los asistentes, intente más tarde'));
+
                 break;
             default:
                 setHelp(help);
@@ -124,12 +143,19 @@ const WaitingRoom = () => {
                     <ContainerForm
                         onSubmit = { handleCallForHelp }
                     >
-                        <p style = {{ textAlign: 'center', fontSize: '.9rem', margin: '0', marginBottom: '1rem' }}> Cuéntenos por qué necesita asistencia: </p>
-            
-                        <FormTextArea
-                            value = { helpMessage }
-                            onChange = { (event) => setHelpMessage(event.target.value) }
-                        ></FormTextArea>
+                        {
+                            activeClassroom.status === 'ok'
+                            ?
+                                <>
+                                    <p style = {{ textAlign: 'center', fontSize: '.9rem', margin: '0', marginBottom: '1rem' }}> Cuéntenos por qué necesita asistencia: </p>
+                                    <FormTextArea
+                                        value = { helpMessage }
+                                        onChange = { (event) => setHelpMessage(event.target.value) }
+                                    ></FormTextArea>
+                                </>
+                            : null
+                        }
+
                         <FormButton 
                             helping = { help }
                             type = "submit"

@@ -1,50 +1,60 @@
-import axios from 'axios'
+import axios from 'axios';
+const baseUrl = '/api/classrooms';
 
-const baseUrl = '/api/classrooms'
+let token = null;
+
+const setToken = newToken => {
+    token = `bearer ${newToken}`;
+};
 
 const getAll = () => {
-    const classrooms = axios.get(baseUrl)
+    const classrooms = axios.get(baseUrl);
 
-    return classrooms.then(response => response.data)
-}
+    return classrooms.then(response => response.data);
+};
 
 const getOne = (classroomId) => {
-    const result = axios.get(`${baseUrl}/${classroomId}`)
+    const result = axios.get(`${baseUrl}/${classroomId}`);
 
-    return result.then(response => response.data)
-}
+    return result.then(response => response.data);
+};
 
 const findOne = (classroomName, classroomStatus) => {
-    let result = null
+    let result = null;
 
     if(classroomName && classroomStatus)
     {
-        result = axios.get(`${baseUrl}/?name=${classroomName.toUpperCase()}&status=${classroomStatus}`)
+        result = axios.get(`${baseUrl}/?name=${classroomName.toUpperCase()}&status=${classroomStatus}`);
     } else if(classroomName)
     {
-        result = axios.get(`${baseUrl}/?name=${classroomName.toUpperCase()}`)
+        result = axios.get(`${baseUrl}/?name=${classroomName.toUpperCase()}`);
     } else if(classroomStatus)
     {
-        result = axios.get(`${baseUrl}/?status=${classroomStatus}`)
+        result = axios.get(`${baseUrl}/?status=${classroomStatus}`);
     } else {
-        result = axios.get(`${baseUrl}/`)
-    }
+        result = axios.get(`${baseUrl}/`);
+    };
 
-    return result.then(response => response.data)
-}
+    return result.then(response => response.data);
+};
 
-const updateOne = (id, newObject) => {
-    console.log(id, newObject)
-    const request = axios.put(`${baseUrl}/${id}`, newObject)
+const updateOne = async (id, newObject) => {
+    const config = { 
+        headers: {
+            Authorization: token,
+        },
+    };
 
-    return request.then(response => response.data)
-}
+    const response = await axios.put(`${baseUrl}/${id}`, newObject, config);
+    return response.data;
+};
 
 const exportedObject = {
     getAll,
     getOne,
     findOne,
-    updateOne
+    updateOne,
+    setToken
 }
 
 export default exportedObject

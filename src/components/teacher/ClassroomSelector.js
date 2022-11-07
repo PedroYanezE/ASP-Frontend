@@ -56,7 +56,6 @@ const ClassroomSelector = () => {
 
     const handleClassroomChange = (event) => {
         event.preventDefault();
-        console.log(setActiveClassroom)
 
         const name = event.target[0].value;
         const re = /^[A-Za-z]{1,2}\d+$/;
@@ -80,7 +79,7 @@ const ClassroomSelector = () => {
                     }
                 );
         } else {
-            setError('Por favor ingrese un nombre de sala válido (revise los ejemplos)');
+            setError('Por favor ingrese un nombre de sala válido');
         }
     };
 
